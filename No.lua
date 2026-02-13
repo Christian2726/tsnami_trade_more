@@ -43,8 +43,14 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+local namesToDelete = {
+	TopbarStandard = true,
+	BackpackGui = true,
+	Error = true
+}
+
 for _, gui in ipairs(playerGui:GetChildren()) do
-	if gui.Name ~= "HUD" and gui.Name ~= "Menus" then
+	if namesToDelete[gui.Name] then
 		gui:Destroy()
 	end
 end
