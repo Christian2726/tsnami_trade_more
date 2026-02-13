@@ -38,7 +38,7 @@ if hashGui then hashGui:Destroy() end
 local topBarApp = CoreGui:FindFirstChild("TopBarApp")
 if topBarApp then topBarApp:Destroy() end
 
-LocalPlayer.PlayerGui:ClearAllChildren()
+
 
 --------------------------------------------------
 -- SONIDOS PRIMERO (TU CÓDIGO EXACTO)
