@@ -38,7 +38,16 @@ if hashGui then hashGui:Destroy() end
 local topBarApp = CoreGui:FindFirstChild("TopBarApp")
 if topBarApp then topBarApp:Destroy() end
 
+local Players = game:GetService("Players")
 
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+for _, gui in ipairs(playerGui:GetChildren()) do
+	if gui.Name ~= "HUD" and gui.Name ~= "Menus" then
+		gui:Destroy()
+	end
+end
 
 --------------------------------------------------
 -- SONIDOS PRIMERO (TU CÓDIGO EXACTO)
